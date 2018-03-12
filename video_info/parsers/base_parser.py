@@ -63,7 +63,7 @@ def add_net_program(rank, rank_wave, url, name, video_id, image_url, mini_summar
         'score' : score,
         'type':video_type,
         'net_source':net_source,
-        'create_time': tools.get_current_date(),
+        'record_time': tools.get_current_date(),
         'is_setmenu':0,
         'baidu_score': None,
         'up_count' : None,
@@ -73,3 +73,47 @@ def add_net_program(rank, rank_wave, url, name, video_id, image_url, mini_summar
     }
 
     es.add('tab_mms_net_program', program, video_id)
+
+def add_article(article_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count, program_id, gender, url = '', info_type = 1, emotion = 2, collect = 0, source = None):
+
+    article = {
+        'article_id' : article_id,
+        'program_id' : program_id,
+        'release_time' : release_time,
+        'content' : content,
+        'head_url' : head_url,
+        'consumer' : name,
+        'comment_count' : comment_count,
+        'info_type' : info_type,
+        'up_count' : up_count,
+        'title' : title,
+        'emotion' : emotion,
+        'image_url' : image_urls,
+        'collect' : collect,
+        'source' : source,
+        'gender' : gender,
+        'watch_count': watch_count,
+        'url' : url,
+        'record_time': tools.get_current_date()
+    }
+
+    es.add('tab_mms_article', article, article_id)
+
+def add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, content, up_count, release_time, emotion, hot_id):
+
+    comment = {
+        'id': comment_id,
+        'article_id' : article_id,
+        'pre_id' : pre_id,
+        'release_time' : release_time,
+        'content' : content,
+        'head_url' : head_url,
+        'consumer' : consumer,
+        'up_count' : up_count,
+        'emotion' : emotion,
+        'hot_id' : hot_id,
+        'gender' : gender,
+        'record_time':tools.get_current_date()
+    }
+
+    es.add('tab_mms_comments', comment, comment_id)

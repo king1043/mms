@@ -796,7 +796,7 @@ def timestamp_to_date(timestamp, time_format = '%Y-%m-%d %H:%M:%S'):
     return time.strftime(time_format, date)
 
 def get_current_timestamp():
-    return int(time.time())
+    return time.time()
 
 def get_current_date(date_format = '%Y-%m-%d %H:%M:%S'):
     return datetime.datetime.now().strftime(date_format)
@@ -842,6 +842,43 @@ def format_date(date, old_format = '', new_format = '%Y-%m-%d %H:%M:%S'):
         log.error('日期格式化出错，old_format = %s 不符合 %s 格式'%(old_format, date))
         date_str = date
     return date_str
+
+@run_safe_model('get_release_time')
+def format_time(release_time):
+    if '年前' in release_time:
+        years = re.compile('(\d+)年前').findall(release_time)
+        years_ago = (datetime.datetime.now() - datetime.timedelta(days=int(years[0]) * 365))
+        release_time = years_ago.strftime("%Y-%m-%d %H:%M:%S")
+
+    elif '月前' in release_time:
+        months = re.compile('(\d+)月前').findall(release_time)
+        months_ago = (datetime.datetime.now() - datetime.timedelta(days=int(months[0]) * 30))
+        release_time = months_ago.strftime("%Y-%m-%d %H:%M:%S")
+
+    elif '周前' in release_time:
+        weeks = re.compile('(\d+)周前').findall(release_time)
+        weeks_ago = (datetime.datetime.now() - datetime.timedelta(days=int(weeks[0]) * 7))
+        release_time = weeks_ago.strftime("%Y-%m-%d %H:%M:%S")
+
+    elif '天前' in release_time:
+        ndays = re.compile('(\d+)天前').findall(release_time)
+        days_ago = (datetime.datetime.now() - datetime.timedelta(days=int(ndays[0])))
+        release_time = days_ago.strftime("%Y-%m-%d %H:%M:%S")
+
+    elif '小时前' in release_time:
+        nhours = re.compile('(\d+)小时前').findall(release_time)
+        hours_ago = (datetime.datetime.now() - datetime.timedelta(hours=int(nhours[0])))
+        release_time = hours_ago.strftime("%Y-%m-%d %H:%M:%S")
+
+    elif re.compile('分钟前').findall(release_time):
+        nminutes = re.compile('(\d+)分钟前').findall(release_time)
+        minutes_ago = (datetime.datetime.now() - datetime.timedelta(minutes=int(nminutes[0])))
+        release_time = minutes_ago.strftime("%Y-%m-%d %H:%M:%S")
+
+    elif not re.compile('\d{4}').findall(release_time):
+        release_time = get_current_date('%Y') + '-' + release_time
+
+    return release_time
 
 def delay_time(sleep_time = 160):
     '''
@@ -922,3 +959,25 @@ def cut_string(text, length):
     return text_list
 
 ##################################################
+
+def get_int(number_str):
+    '''
+    @summary: 将字符串型的数字转为整形
+    ---------
+    @param number_str: 5.5万
+    ---------
+    @result: 55000
+    '''
+    if not isinstance(number_str, str): return number_str
+
+    try:
+        number = get_info(number_str, '(\d*\.?\d*)', fetch_one = True)
+        number = float(number)
+        if '万' in number_str:
+            number *= 10000
+
+        return int(number)
+    except Exception as e:
+        log.error(e)
+
+    return number_str
