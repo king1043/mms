@@ -171,7 +171,7 @@ def get_html(url):
 # import chardet
 @log_function_time
 def get_html_by_urllib(url, code = 'utf-8', headers = {}, proxies = {}):
-    html = None
+    html = ''
     if not url.endswith('.exe') and not url.endswith('.EXE'):
         page = None
         is_timeout = False
@@ -206,7 +206,7 @@ def get_html_by_urllib(url, code = 'utf-8', headers = {}, proxies = {}):
 
 @log_function_time
 def get_html_by_webdirver(url, proxies = ''):
-    html = None
+    html = ''
     try:
 
         driver = webdriver.PhantomJS()
@@ -229,7 +229,7 @@ def get_html_by_webdirver(url, proxies = ''):
 
 @log_function_time
 def get_html_by_requests(url, headers = '', code = 'utf-8', data = None, proxies = {}):
-    html = None
+    html = ''
     if not url.endswith('.exe') and not url.endswith('.EXE'):
         r = None
         try:
@@ -843,7 +843,7 @@ def format_date(date, old_format = '', new_format = '%Y-%m-%d %H:%M:%S'):
         date_str = date
     return date_str
 
-@run_safe_model('get_release_time')
+@run_safe_model('format_time')
 def format_time(release_time):
     if '年前' in release_time:
         years = re.compile('(\d+)年前').findall(release_time)
@@ -870,10 +870,21 @@ def format_time(release_time):
         hours_ago = (datetime.datetime.now() - datetime.timedelta(hours=int(nhours[0])))
         release_time = hours_ago.strftime("%Y-%m-%d %H:%M:%S")
 
-    elif re.compile('分钟前').findall(release_time):
+    elif '分钟前' in release_time:
         nminutes = re.compile('(\d+)分钟前').findall(release_time)
         minutes_ago = (datetime.datetime.now() - datetime.timedelta(minutes=int(nminutes[0])))
         release_time = minutes_ago.strftime("%Y-%m-%d %H:%M:%S")
+
+    elif '昨天' in release_time:
+        today = datetime.date.today()
+        yesterday = today - datetime.timedelta(days=1)
+        release_time = release_time.replace('昨天', str(yesterday))
+
+    elif '今天' in release_time:
+        release_time = release_time.replace('今天', get_current_date('%Y-%m-%d'))
+
+    elif '刚刚' in release_time:
+        release_time = get_current_date()
 
     elif not re.compile('\d{4}').findall(release_time):
         release_time = get_current_date('%Y') + '-' + release_time
