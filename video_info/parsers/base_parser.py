@@ -140,3 +140,22 @@ def add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, cont
     }
 
     es.add('tab_mms_comments', comment, comment_id)
+
+def add_weibo_user(program_id, user_id, name, url, image_url, verified_reason, is_verified, area, sex,
+                   summary, fans_count, follow_count):
+    weibo_user = {
+        'program_id' : program_id,
+        'user_id' : user_id,
+        'name' : name,
+        'url' : url,
+        'image_url' : image_url,
+        'verified_reason' : verified_reason,
+        'is_verified' : is_verified,
+        'area' : area,
+        'sex' : sex,
+        'summary' : summary,
+        'fans_count' : fans_count,
+        'follow_count' : follow_count
+    }
+
+    es.add('tab_mms_weibo_user', weibo_user, user_id)

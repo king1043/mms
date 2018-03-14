@@ -16,7 +16,7 @@ def main():
     db = OracleDB()
 
     sql = '''
-        select t.program_id, c.chan_name, program_name, d.name, t.image_url
+        select t.program_id, c.chan_name, program_name, d.name, t.image_url, t.official_blog
           from TAB_MMS_PROGRAM t
           left join tab_mam_chan c
             on c.chan_id = t.chan_id
@@ -32,7 +32,6 @@ def main():
 
     def end_callback():
         log.info('\n********** news end **********')
-
 
 
     # 配置spider
