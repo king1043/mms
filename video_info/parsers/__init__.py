@@ -1,3 +1,4 @@
 __all__ = [
-    'iqiyi_parser',
+    'iqiyi_hot_parser',
+    'iqiyi_search_parser'
  ]

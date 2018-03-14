@@ -12,7 +12,7 @@ import random
 # 必须定义 网站id
 SITE_ID = 1
 # 必须定义 网站名
-NAME = '爱奇艺'
+NAME = '爱奇艺热点'
 
 # 必须定义 添加网站信息
 @tools.run_safe_model(__name__)
@@ -85,7 +85,7 @@ def parser_video_info(root_url, depth, site_id, remark):
         release_year = tools.get_info(html, regex, fetch_one = True)
 
         # 简介
-        regex = 'data-moreorless="moreinfo".*?<span class="briefIntroTxt">(.*?)</span>'
+        regex = ['data-moreorless="moreinfo".*?<span class="briefIntroTxt">(.*?)</span>', '<span class="briefIntroTxt">(.*?)</span>']
         description = tools.get_info(html, regex, fetch_one = True)
 
         # 演员
@@ -121,12 +121,12 @@ def parser_video_info(root_url, depth, site_id, remark):
 
         self_base_parser.add_net_program(rank, rank_wave, url, name, video_id, image_url, mini_summary, episode_msg, today_play_count, total_play_count, director, classify, institution, release_year, description, actor, score, video_type = 13, net_source = '爱奇艺')
 
-        parser_first_page_article(html, video_id)
+        parser_first_page_article(html, video_id, url)
         # break
 
-    # base_parser.update_url('mms_urls', root_url, Constance.DONE)
+    base_parser.update_url('mms_urls', root_url, Constance.DONE)
 
-def parser_first_page_article(html, video_id):
+def parser_first_page_article(html, video_id, url):
     regex = '(<div class="m-feedSection clearfix.*?)<!-- 评论列表 end-->'
     content_blocks = tools.get_info(html, regex)
 
@@ -178,7 +178,7 @@ def parser_first_page_article(html, video_id):
             评论量：   %s
             '''%(article_id, video_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count))
 
-        self_base_parser.add_article(article_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count, program_id = video_id, gender = random.randint(0,1), url = 'http://www.iqiyi.com/a_19rrh7t9vx.html', info_type = 3, emotion = random.randint(0,2), collect = 0, source = '爱奇艺')
+        self_base_parser.add_article(article_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count, program_id = video_id, gender = random.randint(0,1), url = url, info_type = 3, emotion = random.randint(0,2), collect = 0, source = '爱奇艺')
 
         # 解析評論
         regex = "\['wallId'\] = \"(.*?)\""

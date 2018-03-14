@@ -38,7 +38,7 @@ def add_net_program(rank, rank_wave, url, name, video_id, image_url, mini_summar
     @param description:
     @param actor:
     @param score:
-    @param type: 节目类型  电影 1 电视剧 2
+    @param type: 节目类型  电影 1 电视剧 2 综艺等
     @param net_source: 来源 爱奇艺
     ---------
     @result:
@@ -75,6 +75,29 @@ def add_net_program(rank, rank_wave, url, name, video_id, image_url, mini_summar
     es.add('tab_mms_net_program', program, video_id)
 
 def add_article(article_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count, program_id, gender, url = '', info_type = 1, emotion = 2, collect = 0, source = None):
+    '''
+    @summary:
+    ---------
+    @param article_id:
+    @param head_url:
+    @param name:
+    @param release_time:
+    @param title:
+    @param content:
+    @param image_urls:
+    @param watch_count:
+    @param up_count:
+    @param comment_count:
+    @param program_id:
+    @param gender:
+    @param url:
+    @param info_type: 微信 、 微博、 视频等
+    @param emotion:
+    @param collect:
+    @param source:
+    ---------
+    @result:
+    '''
 
     article = {
         'article_id' : article_id,
