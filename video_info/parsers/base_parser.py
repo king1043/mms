@@ -120,7 +120,11 @@ def add_article(article_id, head_url, name, release_time, title, content, image_
         'record_time': tools.get_current_date()
     }
 
-    es.add('tab_mms_article', article, article_id)
+    if es.get('tab_mms_article', article_id):
+        return False
+    else:
+        es.add('tab_mms_article', article, article_id)
+        return True
 
 def add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, content, up_count, release_time, emotion, hot_id):
 
@@ -139,7 +143,11 @@ def add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, cont
         'record_time':tools.get_current_date()
     }
 
-    es.add('tab_mms_comments', comment, comment_id)
+    if es.get('tab_mms_comments', comment_id):
+        return False
+    else:
+        es.add('tab_mms_comments', comment, comment_id)
+        return True
 
 def add_weibo_user(program_id, user_id, name, url, image_url, verified_reason, is_verified, area, sex,
                    summary, fans_count, follow_count):

@@ -875,7 +875,7 @@ def format_time(release_time):
         minutes_ago = (datetime.datetime.now() - datetime.timedelta(minutes=int(nminutes[0])))
         release_time = minutes_ago.strftime("%Y-%m-%d %H:%M:%S")
 
-    elif '昨天' in release_time:
+    elif '昨天' in release_time or '昨日' in release_time:
         today = datetime.date.today()
         yesterday = today - datetime.timedelta(days=1)
         release_time = release_time.replace('昨天', str(yesterday))

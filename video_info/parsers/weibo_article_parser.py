@@ -5,17 +5,17 @@ sys.path.append('../../')
 import init
 import base.constance as Constance
 import base.base_parser as base_parser
+import video_info.parsers.base_parser as self_base_parser
 import utils.tools as tools
 from utils.log import log
 import datetime
+from db.elastic_search import ES
+import random
 
-SITE_ID = 10004
-search_type = 102
+SITE_ID = 2
 NAME = '新浪微博'
 
-
-FILE_LOCAL_PATH = tools.get_conf_value('config.conf', 'files', 'wwa_save_path') + 'weibo/'
-
+es = ES()
 
 def get_release_time(mblog):
     try:
@@ -47,6 +47,22 @@ def get_release_time(mblog):
     finally:
         return release_time
 
+def get_weibo_users():
+    body = {
+        "size":10000,
+        "_source": [
+            "user_id",
+            'image_url',
+            'name',
+            'sex',
+            'program_id'
+        ]
+    }
+
+    weibo_users = es.search('tab_mms_weibo_user', body)
+    weibo_users = weibo_users.get('hits',{}).get('hits', [])
+
+    return weibo_users
 
 @tools.run_safe_model(__name__)
 def add_site_info():
@@ -69,18 +85,19 @@ def add_root_url(parser_params):
         parser_params : %s
         ''' % str(parser_params))
 
-    keywords_list = parser_params['result_list']
-    for result in keywords_list:
-        keywords = str(result[0]).split(',')
+    weibo_users = get_weibo_users()
+    for weibo_user in weibo_users:
+        user_id = weibo_user.get('_source', {}).get('user_id')
+        image_url = weibo_user.get('_source', {}).get('image_url')
+        name = weibo_user.get('_source', {}).get('name')
+        sex = weibo_user.get('_source', {}).get('sex')
+        program_id = weibo_user.get('_source', {}).get('program_id')
 
-        for search_keyword in keywords:
-            if not search_keyword:
-                continue
-            containerid = '230413' + search_keyword
+        # containerid = '230413' + str(user_id)
 
-            weibo_content_url = 'http://m.weibo.cn/api/container/getIndex?containerid=%s_-_WEIBO_SECOND_PROFILE_WEIBO&page_type=03' % containerid
-            base_parser.add_url('WWA_weibo_info_urls', SITE_ID, weibo_content_url,
-                                remark={'search_keyword': search_keyword})
+        weibo_content_url = 'http://m.weibo.cn/api/container/getIndex?containerid=230413%s_-_WEIBO_SECOND_PROFILE_WEIBO&page_type=03' % user_id
+        base_parser.add_url('mms_urls', SITE_ID, weibo_content_url,
+                            remark={'user_id': user_id, 'head_url':image_url, 'user_name' : name, 'gender' : sex, 'program_id' : program_id})
 
 
 def parser(url_info):
@@ -88,11 +105,18 @@ def parser(url_info):
     log.debug('处理 \n' + tools.dumps_json(url_info))
 
     root_url = url_info['url']
-    weibo_id = url_info['remark']['search_keyword']
+    user_id = url_info['remark']['user_id']
+    head_url = url_info['remark']['head_url']
+    user_name = url_info['remark']['user_name']
+    gender = url_info['remark']['gender']
+    program_id = url_info['remark']['program_id']
 
-    page_count = 100
+    page_count = 50
+    is_continue = True
 
     for i in range(0, page_count + 1):
+        if not is_continue: break
+
         weibo_content_url = root_url + '&page=%d' % i
 
         headers = {
@@ -110,7 +134,7 @@ def parser(url_info):
 
         cards = tools.get_json_value(html, 'data.cards')
         if len(cards) < 2:
-            base_parser.update_url('WWA_weibo_info_urls', root_url, Constance.DONE)
+            base_parser.update_url('mms_urls', root_url, Constance.DONE)
             return
 
         for card in cards:
@@ -166,7 +190,8 @@ def parser(url_info):
 
             log.debug('''
                 原文地址：     %s
-                微博ID：       %s
+                博主ID：       %s
+                文章id         %s
                 发布时间：     %s
                 来自：         %s
                 内容：         %s
@@ -175,18 +200,23 @@ def parser(url_info):
                 评论数：       %s
                 转发数：       %s
                 点赞数：       %s
-                ''' % (article_url, weibo_id, release_time, come_from, content, image_url, video_url, comments_count,
+                ''' % (article_url, user_id, article_id, release_time, come_from, content, image_url, video_url, comments_count,
                     transpond_count, praise_count))
 
-            if comments_count > 0:
-                parser_comment(article_id)
+            if self_base_parser.add_article(article_id, head_url, user_name, release_time, None, content, image_url, None, praise_count, comments_count, program_id = program_id, gender = gender, url = article_url, info_type = 1, emotion = random.randint(0,2), collect = 0, source = '新浪微博')
 
+                if comments_count > 0:
+                    parser_comment(article_id)
+            else:
+                is_continue = False
+                break
 
-    base_parser.update_url('WWA_weibo_info_urls', root_url, Constance.DONE)
+    base_parser.update_url('mms_urls', root_url, Constance.DONE)
 
 def parser_comment(article_id):
     page = 1
-    while True:
+    is_continue = True
+    while True and is_continue:
         url = 'https://m.weibo.cn/api/comments/show?id=%s&page=%s'%(article_id, page)
         comment_json = tools.get_json_by_requests(url)
         msg = comment_json.get('msg')
@@ -204,6 +234,9 @@ def parser_comment(article_id):
             user_name = comment_data.get('user', {}).get('screen_name')
             head_url = comment_data.get('user', {}).get('profile_image_url')
 
+            emotion = random.randint(0, 2)
+            hot_id =  comment_id
+
             log.debug('''
                 id:       %s
                 发布时间：%s
@@ -213,6 +246,10 @@ def parser_comment(article_id):
                 用户名    %s
                 头像地址  %s
                 '''%(comment_id, release_time, come_from, content, praise_count, user_name, head_url))
+
+            if not self_base_parser.add_comment(comment_id, None, article_id, user_name, head_url, None, content, praise_count, release_time, emotion, hot_id):
+                is_continue = False
+                break
 
         page += 1
 
@@ -229,3 +266,4 @@ if __name__ == '__main__':
         "depth": 0
     }
     parser(url_info)
+    # get_weibo_users_id()

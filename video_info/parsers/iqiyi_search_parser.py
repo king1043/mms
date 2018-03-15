@@ -172,7 +172,7 @@ def parser_video_info(root_url, depth, site_id, remark):
 
         parser_first_page_article(html, program_id, url)
         parser_comment_article(html, video_id, program_id, url)
-        break
+        break # 找到了想要查找到的节目， 后面的不继续爬取评论  跳出
 
     base_parser.update_url('mms_urls', root_url, Constance.DONE)
 
@@ -197,8 +197,6 @@ def parser_comment_article(html, video_id, program_id, url):
         return
 
     comment_url = 'http://api-t.iqiyi.com/qx_api/comment/get_video_comments?aid={aid}&albumid={video_id}&categoryid=15&cb=fnsucc&escape=true&is_video_page=true&need_reply=true&need_subject=true&need_total=1&page=1&page_size=10&page_size_reply=3&qitan_comment_type=1&qitanid={aid}&qypid=01010011010000000000&reply_sort=hot&sort=add_time&tvid={tvid}'.format(aid = aid, video_id = video_id, tvid = tvid)
-
-    print(comment_url)
 
     comment_json = tools.get_json_by_requests(comment_url)
     comments = comment_json.get('data', {}).get('comments', [])
@@ -233,11 +231,14 @@ def parser_comment_article(html, video_id, program_id, url):
             评论量：   %s
             '''%(article_id, video_id, head_url, name, release_time, title, content, '', watch_count, up_count, comment_count))
 
-        self_base_parser.add_article(article_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count, program_id = program_id, gender = gender, url = url, info_type = 3, emotion = random.randint(0,2), collect = 0, source = '爱奇艺')
+        if self_base_parser.add_article(article_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count, program_id = program_id, gender = gender, url = url, info_type = 3, emotion = random.randint(0,2), collect = 0, source = '爱奇艺'):
 
-        # 解析回复
-        reply_list = comment.get('replyList') or []
-        parser_relpy_comment(reply_list)
+            # 解析回复
+            reply_list = comment.get('replyList') or []
+            parser_relpy_comment(reply_list)
+        else:
+            break
+
 
 def parser_relpy_comment(reply_list):
     for reply in reply_list:
@@ -268,7 +269,8 @@ def parser_relpy_comment(reply_list):
             发布时间  %s
             '''%(comment_id, pre_id, article_id, consumer, head_url, gender, content, up_count, release_time))
 
-        self_base_parser.add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, content, up_count, release_time, emotion, hot_id)
+        if not self_base_parser.add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, content, up_count, release_time, emotion, hot_id):
+            break
 
 #########################################################
 
@@ -333,13 +335,14 @@ def parser_first_page_article(html, video_id, url):
             评论量：   %s
             '''%(article_id, video_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count))
 
-        self_base_parser.add_article(article_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count, program_id = video_id, gender = random.randint(0,1), url = url, info_type = 3, emotion = random.randint(0,2), collect = 0, source = '爱奇艺')
+        if self_base_parser.add_article(article_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count, program_id = video_id, gender = random.randint(0,1), url = url, info_type = 3, emotion = random.randint(0,2), collect = 0, source = '爱奇艺'):
 
-        # 解析評論
-        regex = "\['wallId'\] = \"(.*?)\""
-        wall_id = tools.get_info(html, regex, fetch_one = True)
-        parser_comment(article_id, wall_id)
-        # break
+            # 解析評論
+            regex = "\['wallId'\] = \"(.*?)\""
+            wall_id = tools.get_info(html, regex, fetch_one = True)
+            parser_comment(article_id, wall_id)
+        else:
+            break
 
 def parser_comment(content_id, wall_id, page = 1):
     flow_comment_url = 'http://sns-comment.iqiyi.com/v2/comment/get_comments.action?contentid={content_id}&page={page}&authcookie=null&page_size=40&wallId={wall_id}&agenttype=117&t={timestamp_m}'.format(content_id = content_id, page = page, wall_id = wall_id, timestamp_m = int(tools.get_current_timestamp() * 1000))
@@ -354,8 +357,11 @@ def parser_comment(content_id, wall_id, page = 1):
     replies = data.get('replies', [])
     for reply in replies:
         reply_source = reply.get("replySource", {})
-        deal_comment(reply_source)
-        deal_comment(reply)
+        if not deal_comment(reply_source):
+            break
+
+        if not deal_comment(reply):
+            break
 
 def deal_comment(reply):
     if not reply: return
@@ -387,7 +393,7 @@ def deal_comment(reply):
         发布时间  %s
         '''%(comment_id, pre_id, article_id, consumer, head_url, gender, content, up_count, release_time))
 
-    self_base_parser.add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, content, up_count, release_time, emotion, hot_id)
+    return self_base_parser.add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, content, up_count, release_time, emotion, hot_id)
 
 if __name__ == '__main__':
     url_info = {'site_id': 2, 'remark': {'program_type': '综艺', 'program_id': 94, 'image_url': 'http://www.qiyipic.com/common/images/load.gif', 'program_name': '上阵父子兵', 'chan_name': '山东卫视'}, 'retry_times': 0, '_id': '5aa7b1255344650cd0284b57', 'depth': 0, 'url': 'http://so.iqiyi.com/so/q_上阵父子兵 综艺?source=input&sr=1170053009947', 'status': 0}

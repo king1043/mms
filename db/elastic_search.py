@@ -153,3 +153,31 @@ class ES(Singleton):
 
 if __name__ == '__main__':
     es = ES()
+    program ={
+    "sensitive": 0,
+    "rank": "1",
+    "collect": 0,
+    "total_play_count": "6亿播放",
+    "net_source": "爱奇艺",
+    "actor": "刘烨,林依晨,雷佳音,胡先煦,郭姝彤,李建义,王妍之",
+    "keywords": "刘烨林依晨绝处逢爱",
+    "url": "http://www.iqiyi.com/a_19rrh7t9vx.html",
+    "episode": "更新至18集",
+    "up_count": None,
+    "director": "刘俊杰",
+    "is_setmenu": 0,
+    "baidu_score": None,
+    "image_url": "http://pic4.qiyipic.com/image/20180305/0b/54/a_100055528_m_601_m6_180_101.jpg",
+    "classify": "都市",
+    "release_year": "2018",
+    "rank_wave": 0,
+    "program_id": "207680801",
+    "record_time": "2018-03-15 11:05:58",
+    "institution": "湖南卫视",
+    "program_name": "老男孩",
+    "description": "吴争，民航机长，拥有令人艳羡的职业和外型，飞行中他技术过硬，承载无数乘客的责任。生活中他天性不羁爱自由，恣意挥洒，不管他人眼光。在自己的世界里，做个彻头彻尾的老男孩。直到有一天，一个 16岁的儿子从天而降，一个正义的女老师林小欧紧随其后，两人前后脚的到来，彻底颠覆了吴争既有的生活。林小欧，无忧无虑的乐天派，时髦得有点用力，正义得有点莽撞，她是学生们亲切的姐姐、爽朗的朋友和没架子的好老师。当得知得意门生萧晗突遭家变，成了无家可归的孤儿，她费劲心力要与孩子生父沟通，当她见到了孩子生父才发现，原来，他就是自己不久前海外旅行时的噩梦——处处和她作对、极不靠谱的吴争 。",
+    "play_count_total": "1.2亿",
+    "score": "7.1",
+    "type": 13
+    }
+    es.add('tab_mms_net_program', program, '207680801')

@@ -178,13 +178,14 @@ def parser_first_page_article(html, video_id, url):
             评论量：   %s
             '''%(article_id, video_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count))
 
-        self_base_parser.add_article(article_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count, program_id = video_id, gender = random.randint(0,1), url = url, info_type = 3, emotion = random.randint(0,2), collect = 0, source = '爱奇艺')
+        if self_base_parser.add_article(article_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count, program_id = video_id, gender = random.randint(0,1), url = url, info_type = 3, emotion = random.randint(0,2), collect = 0, source = '爱奇艺'):
 
-        # 解析評論
-        regex = "\['wallId'\] = \"(.*?)\""
-        wall_id = tools.get_info(html, regex, fetch_one = True)
-        parser_comment(article_id, wall_id)
-        # break
+            # 解析評論
+            regex = "\['wallId'\] = \"(.*?)\""
+            wall_id = tools.get_info(html, regex, fetch_one = True)
+            parser_comment(article_id, wall_id)
+        else:
+            break
 
 def parser_comment(content_id, wall_id, page = 1):
     flow_comment_url = 'http://sns-comment.iqiyi.com/v2/comment/get_comments.action?contentid={content_id}&page={page}&authcookie=null&page_size=40&wallId={wall_id}&agenttype=117&t={timestamp_m}'.format(content_id = content_id, page = page, wall_id = wall_id, timestamp_m = int(tools.get_current_timestamp() * 1000))
@@ -199,8 +200,11 @@ def parser_comment(content_id, wall_id, page = 1):
     replies = data.get('replies', [])
     for reply in replies:
         reply_source = reply.get("replySource", {})
-        deal_comment(reply_source)
-        deal_comment(reply)
+        if not deal_comment(reply_source):
+            break
+
+        if not deal_comment(reply):
+            break
 
 def deal_comment(reply):
     if not reply: return
@@ -232,7 +236,7 @@ def deal_comment(reply):
         发布时间  %s
         '''%(comment_id, pre_id, article_id, consumer, head_url, gender, content, up_count, release_time))
 
-    self_base_parser.add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, content, up_count, release_time, emotion, hot_id)
+    return self_base_parser.add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, content, up_count, release_time, emotion, hot_id)
 
 
 if __name__ == '__main__':
