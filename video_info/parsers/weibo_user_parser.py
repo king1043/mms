@@ -9,7 +9,7 @@ import utils.tools as tools
 from utils.log import log
 from db.oracledb import OracleDB
 
-SITE_ID = 2
+SITE_ID = 4
 NAME = '新浪微博'
 db = OracleDB()
 

@@ -12,7 +12,7 @@ import datetime
 from db.elastic_search import ES
 import random
 
-SITE_ID = 2
+SITE_ID = 3
 NAME = '新浪微博'
 
 es = ES()
@@ -203,7 +203,7 @@ def parser(url_info):
                 ''' % (article_url, user_id, article_id, release_time, come_from, content, image_url, video_url, comments_count,
                     transpond_count, praise_count))
 
-            if self_base_parser.add_article(article_id, head_url, user_name, release_time, None, content, image_url, None, praise_count, comments_count, program_id = program_id, gender = gender, url = article_url, info_type = 1, emotion = random.randint(0,2), collect = 0, source = '新浪微博')
+            if self_base_parser.add_article(article_id, head_url, user_name, release_time, None, content, image_url, None, praise_count, comments_count, program_id = program_id, gender = gender, url = article_url, info_type = 1, emotion = random.randint(0,2), collect = 0, source = '新浪微博'):
 
                 if comments_count > 0:
                     parser_comment(article_id)

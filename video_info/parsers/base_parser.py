@@ -12,9 +12,11 @@ import init
 
 import utils.tools as tools
 from db.elastic_search import ES
+from emotion.emotion import Emotion
 # from db.mongodb import MongoDB
 
 es = ES()
+emotion_obj = Emotion()
 # mongodb = MongoDB()
 
 def add_net_program(rank, rank_wave, url, name, video_id, image_url, mini_summary, episode_msg, today_play_count, total_play_count, director, classify, institution, release_year, description, actor, score, video_type, net_source):
@@ -99,6 +101,7 @@ def add_article(article_id, head_url, name, release_time, title, content, image_
     @result:
     '''
 
+    emotion = emotion_obj.get_emotion((title or '') + content)
     article = {
         'article_id' : article_id,
         'program_id' : program_id,
@@ -121,13 +124,14 @@ def add_article(article_id, head_url, name, release_time, title, content, image_
     }
 
     if es.get('tab_mms_article', article_id):
-        return False
+        return True
     else:
         es.add('tab_mms_article', article, article_id)
         return True
 
 def add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, content, up_count, release_time, emotion, hot_id):
 
+    emotion = emotion_obj.get_emotion(content)
     comment = {
         'id': comment_id,
         'article_id' : article_id,
@@ -144,7 +148,7 @@ def add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, cont
     }
 
     if es.get('tab_mms_comments', comment_id):
-        return False
+        return True
     else:
         es.add('tab_mms_comments', comment, comment_id)
         return True
