@@ -24,6 +24,7 @@ def main():
             on t.type = d.id
            and d.type = 2
     '''
+          # where t.program_id =  226
     program_info = db.find(sql)
 
     def begin_callback():
@@ -40,7 +41,7 @@ def main():
     # 添加parser
     spider.add_parser(iqiyi_hot_parser)
     spider.add_parser(iqiyi_search_parser)
-    # spider.add_parser(weibo_user_parser)
+    spider.add_parser(weibo_user_parser)
     spider.add_parser(weibo_article_parser)
 
     spider.start()

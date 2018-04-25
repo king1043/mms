@@ -92,9 +92,9 @@ def parser_video_info(root_url, depth, site_id, remark):
         regex = '<a href=.*?class="channelTag".*?>(.*?)</a>'
         video_type = tools.get_info(html, regex, fetch_one = True)
 
-        if program_type != '其他' and video_type and program_type != video_type:
-            # print(video_type, name)
-            continue
+        # if program_type != '其他' and video_type and program_type != video_type:
+        #     # print(video_type, name)
+        #     continue
 
         regex = [
             '<div class="info-img">.*?<img src="(.*?)"',

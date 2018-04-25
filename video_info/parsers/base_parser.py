@@ -76,7 +76,7 @@ def add_net_program(rank, rank_wave, url, name, video_id, image_url, mini_summar
 
     es.add('tab_mms_net_program', program, video_id)
 
-def add_article(article_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count, program_id, gender, url = '', info_type = 1, emotion = 2, collect = 0, source = None):
+def add_article(article_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count, program_id, gender, url = '', info_type = 3, emotion = 2, collect = 0, source = None):
     '''
     @summary:
     ---------
@@ -125,9 +125,11 @@ def add_article(article_id, head_url, name, release_time, title, content, image_
 
     if es.get('tab_mms_article', article_id):
         return True
+        # return False
     else:
         es.add('tab_mms_article', article, article_id)
         return True
+
 
 def add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, content, up_count, release_time, emotion, hot_id):
 
@@ -148,6 +150,7 @@ def add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, cont
     }
 
     if es.get('tab_mms_comments', comment_id):
+        # return False
         return True
     else:
         es.add('tab_mms_comments', comment, comment_id)

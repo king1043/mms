@@ -89,4 +89,4 @@ if __name__ == "__main__":
     # data = word.get_data(table, 1, 1)
     data = word.get_datas(table)
     # print(data[1,:])
-    print(data[:,0])
+    print(data[1,:])
