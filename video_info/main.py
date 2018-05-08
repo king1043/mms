@@ -47,4 +47,7 @@ def main():
     spider.start()
 
 if __name__ == '__main__':
-    main()
+    while True:
+        main()
+        log.debug('sleep 3600s')
+        tools.delay_time(60*60)

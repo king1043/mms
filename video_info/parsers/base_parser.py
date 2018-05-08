@@ -124,8 +124,7 @@ def add_article(article_id, head_url, name, release_time, title, content, image_
     }
 
     if es.get('tab_mms_article', article_id):
-        return True
-        # return False
+        return False
     else:
         es.add('tab_mms_article', article, article_id)
         return True
@@ -150,8 +149,7 @@ def add_comment(comment_id, pre_id, article_id, consumer, head_url, gender, cont
     }
 
     if es.get('tab_mms_comments', comment_id):
-        # return False
-        return True
+        return False
     else:
         es.add('tab_mms_comments', comment, comment_id)
         return True
