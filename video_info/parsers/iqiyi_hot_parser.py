@@ -122,6 +122,15 @@ def parser_video_info(root_url, depth, site_id, remark):
         self_base_parser.add_net_program(rank, rank_wave, url, name, video_id, image_url, mini_summary, episode_msg, today_play_count, total_play_count, director, classify, institution, release_year, description, actor, score, video_type = 13, net_source = '爱奇艺')
 
         parser_first_page_article(html, video_id, url)
+
+        # 取wall_id, feed_id, sns_time
+        regex = "\['wallId'\] = \"(.*?)\""
+        wall_id = tools.get_info(html, regex, fetch_one = True)
+        regex = "\['feedId'\] = (\d*?);"
+        feed_id = tools.get_info(html, regex, fetch_one = True)
+        regex = "\['snsTime'\] = (\d*?);"
+        sns_time = tools.get_info(html, regex, fetch_one = True)
+        parser_next_page_article(video_id, wall_id, feed_id, sns_time, url)
         # break
 
     base_parser.update_url('mms_urls', root_url, Constance.DONE)
@@ -187,7 +196,63 @@ def parser_first_page_article(html, video_id, url):
         else:
             break
 
+def parser_next_page_article(video_id, wall_id, feed_id, sns_time, url):
+    article_json_url = 'http://api-t.iqiyi.com/feed/get_feeds?authcookie=&device_id=pc_web&m_device_id=a11e6ea94270eaaa0b46be30af84fc54&agenttype=118&wallId={wall_id}&feedTypes=1%2C7%2C8%2C9&count=20&top=1&hasRecomFeed=1&feedId={feed_id}&needTotal=1&notice=1&version=1&upOrDown=1&snsTime={sns_time}&_={timestamp_m}'.format(wall_id = wall_id, feed_id = feed_id, sns_time = sns_time, timestamp_m = int(tools.get_current_timestamp() * 1000))
+    print(article_json_url)
+    article_json = tools.get_json_by_requests(article_json_url)
+
+    wall_id = article_json.get('data', {}).get('wallId')
+    # 评论数组
+    feeds = article_json.get('data', {}).get('feeds', [])
+    for feed in feeds:
+        article_id = feed.get('commentId')
+
+        head_url = feed.get('icon')
+
+        name = feed.get('name')
+
+        release_time = feed.get('releaseDate')
+        release_time = tools.timestamp_to_date(release_time)
+
+        title = feed.get('feedTitle')
+
+        content = feed.get('description')
+
+        image_urls = ','.join([img.get('url') for img in feed.get('pictures', [])])#逗号分隔
+
+        watch_count = feed.get('uvCount')
+
+        up_count = feed.get('agreeCount')
+
+        comment_count = feed.get('commentCount')
+
+        log.debug('''
+            id：       %s
+            节目id     %s
+            头像地址： %s
+            名字：     %s
+            发布时间： %s
+            标题：     %s
+            内容：     %s
+            图片地址： %s
+            观看量：   %s
+            点赞量：   %s
+            评论量：   %s
+            '''%(article_id, video_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count))
+
+        if self_base_parser.add_article(article_id, head_url, name, release_time, title, content, image_urls, watch_count, up_count, comment_count, program_id = video_id, gender = random.randint(0,1), url = url, info_type = 3, emotion = random.randint(0,2), collect = 0, source = '爱奇艺'):
+            # 解析評論
+            parser_comment(article_id, wall_id)
+        else:
+            break
+
+    if feeds:
+        feed_id = feeds[-1].get('feedId')
+        sns_time = feeds[-1].get('snsTime')
+        parser_next_page_article(video_id, wall_id, feed_id, sns_time, url)
+
 def parser_comment(content_id, wall_id, page = 1):
+    log.debug('正在爬取第 %s 页文章评论 content_id = %s'%(page, content_id))
     flow_comment_url = 'http://sns-comment.iqiyi.com/v2/comment/get_comments.action?contentid={content_id}&page={page}&authcookie=null&page_size=40&wallId={wall_id}&agenttype=117&t={timestamp_m}'.format(content_id = content_id, page = page, wall_id = wall_id, timestamp_m = int(tools.get_current_timestamp() * 1000))
 
     comment_json = tools.get_json_by_requests(flow_comment_url)
@@ -205,6 +270,9 @@ def parser_comment(content_id, wall_id, page = 1):
 
         if not deal_comment(reply):
             break
+
+    if replies:
+        parser_comment(content_id, wall_id, page + 1)
 
 def deal_comment(reply):
     if not reply: return

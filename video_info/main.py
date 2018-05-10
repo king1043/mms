@@ -40,14 +40,11 @@ def main():
 
     # 添加parser
     spider.add_parser(iqiyi_hot_parser)
-    spider.add_parser(iqiyi_search_parser)
-    spider.add_parser(weibo_user_parser)
-    spider.add_parser(weibo_article_parser)
+    # spider.add_parser(iqiyi_search_parser)
+    # spider.add_parser(weibo_user_parser)
+    # spider.add_parser(weibo_article_parser)
 
     spider.start()
 
 if __name__ == '__main__':
-    while True:
-        main()
-        log.debug('sleep 3600s')
-        tools.delay_time(60*60)
+    main()
