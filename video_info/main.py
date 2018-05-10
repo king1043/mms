@@ -39,8 +39,8 @@ def main():
     spider = Spider(tab_urls = 'mms_urls', begin_callback = begin_callback, end_callback = end_callback, delete_tab_urls = True, parser_params = program_info)
 
     # 添加parser
-    spider.add_parser(iqiyi_hot_parser)
-    # spider.add_parser(iqiyi_search_parser)
+    # spider.add_parser(iqiyi_hot_parser)
+    spider.add_parser(iqiyi_search_parser)
     # spider.add_parser(weibo_user_parser)
     # spider.add_parser(weibo_article_parser)
 

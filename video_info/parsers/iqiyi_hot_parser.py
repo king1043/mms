@@ -245,11 +245,11 @@ def parser_next_page_article(video_id, wall_id, feed_id, sns_time, url):
             parser_comment(article_id, wall_id)
         else:
             break
-
-    if feeds:
-        feed_id = feeds[-1].get('feedId')
-        sns_time = feeds[-1].get('snsTime')
-        parser_next_page_article(video_id, wall_id, feed_id, sns_time, url)
+    else:
+        if feeds:
+            feed_id = feeds[-1].get('feedId')
+            sns_time = feeds[-1].get('snsTime')
+            parser_next_page_article(video_id, wall_id, feed_id, sns_time, url)
 
 def parser_comment(content_id, wall_id, page = 1):
     log.debug('正在爬取第 %s 页文章评论 content_id = %s'%(page, content_id))
@@ -271,8 +271,9 @@ def parser_comment(content_id, wall_id, page = 1):
         if not deal_comment(reply):
             break
 
-    if replies:
-        parser_comment(content_id, wall_id, page + 1)
+    else:
+        if replies:
+            parser_comment(content_id, wall_id, page + 1)
 
 def deal_comment(reply):
     if not reply: return
